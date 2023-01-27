@@ -5,15 +5,24 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.mapsapp.data.repo.MarkerRepo
+import com.example.mapsapp.domain.model.MarkerEntity
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.launch
+import java.util.*
 
 class MainViewModel constructor(
     private val locationService: FusedLocationProviderClient,
+    private val repo: MarkerRepo
 ) : ViewModel() {
 
     private val _myLocationLiveData = MutableLiveData<LatLng>()
     val myLocationLiveData: LiveData<LatLng> by this::_myLocationLiveData
+
+    private val _markersLiveData = MutableLiveData<List<MarkerEntity>>()
+    val markersLiveData: LiveData<List<MarkerEntity>> by this::_markersLiveData
 
     private val locationRequest = LocationRequest.Builder(DEVICE_LOCATION_REFRESH_PERIOD)
         .setDurationMillis(DEVICE_LOCATION_REQUEST_DURATION)
@@ -40,6 +49,25 @@ class MainViewModel constructor(
             locationCallback,
             Looper.getMainLooper()
         )
+    }
+
+    fun onAddMarker(latLng: LatLng) {
+        viewModelScope.launch {
+            repo.insertMarker(
+                MarkerEntity(
+                    id = Random().nextInt(),
+                    latLng = latLng,
+                    title = "",
+                    annotation = ""
+                )
+            )
+        }
+    }
+
+    fun getMarkers() {
+        viewModelScope.launch {
+            _markersLiveData.postValue(repo.getAllMarkers())
+        }
     }
 
 

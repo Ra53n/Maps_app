@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Maps app</string>
+    <string name="permissions_granted">Разрешения были выданы</string>
+    <string name="permissions_not_granted">Разрешения не выданы</string>
 </resources>
